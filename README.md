@@ -12,9 +12,9 @@
    (Для Linux достаточно выполнить команды:
    echo "127.0.0.1 site.local" >> /etc/hosts 
    echo "127.0.0.1 phpmyadmin.local" >> /etc/hosts )
-4. В командной строке зайти в папку ../proxy
+4. В командной строке зайти в папку ../test_task_enterform/proxy
 5. Выполнить команду: docker-compose up -d
-6. Вернуться в главную папку проекта
+6. Вернуться в главную папку проекта ../test_task_enterform
 7. Выполнить команду: docker-compose up -d
 8. Проект должен быть доступен по адресу: http://site.local
    PhpMyAdmin доступен по адресу: http://phpmyadmin.local
