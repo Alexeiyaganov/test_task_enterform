@@ -1,52 +1,53 @@
-version: '2'
+version: '3.0'
 
 services:
-    db:
-        build: db
-        ports:
-            - 3306:3306
-        volumes:
-            - "./.data/db:/var/lib/mysql"
-        environment:
-            MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: codexdb
-    redis:
-        image: redis:alpine
-        ports:
-            - 6379:6379
-    memcached:
-        image: memcached:alpine
-        ports:
-            - 11211:11211
-    php:
-        build: php5.6-fpm
-        links:
-            - db:mysqldb
-            - redis
-            - memcached
-        volumes:
-            - ./www:/var/www/codex
-            - ./logs/codex:/var/www/codex/logs
-    nginx:
-        build: nginx
-        ports:
-            - 8081:80
-        links:
-            - php
-            - redis
-        volumes_from:
-            - php
-        volumes:
-            - ./logs/nginx/:/var/log/nginx
 
-    phpmyadmin:
-        build: ./phpmyadmin
-        environment:
-            PMA_ARBITRARY: 1
-            MYSQL_USER: root
-            MYSQL_PASSWORD: root
-            MYSQL_ROOT_PASSWORD: root
-        ports:
-            - 8082:80
-        links:
-            - db
+  nginx:
+    image: nginx
+    environment:
+      - VIRTUAL_HOST=site.local
+    depends_on:
+      - php
+    volumes:
+      - ./docker/nginx/conf.d/default.nginx:/etc/nginx/conf.d/default.conf
+      - ./html/:/var/www/html/
+    networks:
+      - frontend
+      - backend
+
+  php:
+    build:
+      context: ./docker/php
+    volumes:
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+      - ./html/:/var/www/html/
+    networks:
+      - backend
+
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - backend
+
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    environment:
+      - VIRTUAL_HOST=phpmyadmin.local
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+    networks:
+      - frontend
+      - backend
+
+
+networks:
+  frontend:
+    external:
+      name: proxy_proxy
+  backend:
